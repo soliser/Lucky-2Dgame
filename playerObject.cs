@@ -1,35 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
-using Microsoft.Xna.Framework.Net;
-using Microsoft.Xna.Framework.Storage;
+
 
 namespace WindowsGame1
 {
-    class playerObject : graphicsObject
+    class PlayerObject : GraphicsObject
     {
 
-        public Vector2 bgSpeed;
+        public Vector2 BgSpeed;
         
-        public playerObject(Vector2 intPos, Vector2 bgSpeed, string tex)
+        public PlayerObject(Vector2 intPos, Vector2 bgSpeed, string tex)
         {
             Content.RootDirectory = "Content";
-            this.bgSpeed = bgSpeed;
-            position = new Vector2(intPos.X, intPos.Y);
-            texture = Texture2D.FromFile(Game1.graphics.GraphicsDevice, tex);
-            width = texture.Width; height = texture.Height;
-            center = new Vector2(width / 2, height / 2);
-            color = new Color[texture.Width * texture.Height];
-            texture.GetData(color);
-            isVisible = true;
+            BgSpeed = bgSpeed;
+            Position = new Vector2(intPos.X, intPos.Y);
+            using (var fileStream = new FileStream(tex, FileMode.Open))
+            {
+                Texture = Texture2D.FromStream(Game1.Graphics.GraphicsDevice, fileStream);
+            }
+            Width = Texture.Width; Height = Texture.Height;
+            Center = new Vector2(x: Width / 2, y: Height / 2);
+            Color = new Color[Texture.Width * Texture.Height];
+            Texture.GetData(Color);
+            IsVisible = true;
         }
         public void update(GameTime gameTime)
         {
@@ -39,9 +34,9 @@ namespace WindowsGame1
             KeyboardState keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(Keys.Right))
             {
-                if (position.X < 720)
+                if (Position.X < 720)
                 {
-                    position.X += speed * scale;
+                    Position.X += speed * scale;
                 }
 
 
@@ -49,34 +44,34 @@ namespace WindowsGame1
             }
             else if (keyboard.IsKeyDown(Keys.Left))
             {
-                if (position.X > 10)
+                if (Position.X > 10)
                 {
-                    position.X -= speed * scale;
+                    Position.X -= speed * scale;
                 }
 
             }
             if (keyboard.IsKeyDown(Keys.Up))
             {
-                if(position.Y > 100) 
+                if(Position.Y > 100) 
                 {
-                    position.Y -= speed * scale;
+                    Position.Y -= speed * scale;
                 }
                 else 
                 {
-                    if(bgSpeed.Y<1000)
-                    bgSpeed.Y +=5;
+                    if(BgSpeed.Y<1000)
+                    BgSpeed.Y +=5;
                 }
             }
             else if (keyboard.IsKeyDown(Keys.Down))
             {
-                if (position.Y < 550)
+                if (Position.Y < 550)
                 {
-                    position.Y += speed * scale;
+                    Position.Y += speed * scale;
                 }
                 else
                 {
-                    if(bgSpeed.Y>100)
-                      bgSpeed.Y -= 10;
+                    if(BgSpeed.Y>100)
+                      BgSpeed.Y -= 10;
                 }
             }
             
@@ -85,9 +80,9 @@ namespace WindowsGame1
         public void draw(SpriteBatch S)
         {
             //Adds a sprite to the batch of sprites to be rendered, specifying the texture, screen position, source rectangle, color tint, rotation, origin, scale, effects, and sort depth.  
-          
-                S.Begin(SpriteBlendMode.AlphaBlend);  //Start drawing 2D images
-                S.Draw(texture, position, Color.White);
+
+                S.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);  //Start drawing 2D images
+                S.Draw(Texture, Position, Microsoft.Xna.Framework.Color.White);
                 S.End();  //Stop drawing 2D images
            
 
