@@ -1,88 +1,75 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
-using Microsoft.Xna.Framework.Net;
-using Microsoft.Xna.Framework.Storage;
-
 
 namespace WindowsGame1
 {
 
-    public class enemyObject : graphicsObject
+    public class EnemyObject : GraphicsObject
     {
-  
-        
-        public float scale;
-        public Vector2 direction;
-        Vector2 intPos;
-
-        
-        
-        public enemyObject(Vector2 position, Vector2 direction, float scale, int value, string tex)
+        public float Scale;
+        public Vector2 Direction;
+        readonly Vector2 _intPos;
+   
+        public EnemyObject(Vector2 position, Vector2 direction, float scale, int value, string tex)
         {
             Content.RootDirectory = "Content";
-            active = false;
-            this.value = value;
-            this.direction = direction;
-            this.position = position;
-            this.scale = scale;
-            intPos = position;
-            texture = Texture2D.FromFile(Game1.graphics.GraphicsDevice, tex);
-            width = texture.Width; height = texture.Height;
-            center = new Vector2(width / 2, height / 2);
-            color = new Color[texture.Width * texture.Height];
-            texture.GetData(color);
+            Active = false;
+            this.Value = value;
+            Direction = direction;
+            Position = position;
+            Scale = scale;
+            _intPos = position;
+            using (var fileStream = new FileStream(tex, FileMode.Open))
+            {
+                Texture = Texture2D.FromStream(Game1.Graphics.GraphicsDevice, fileStream);
+            } 
+            Width = Texture.Width; Height = Texture.Height;
+            Center = new Vector2(x: Width / 2, y: Height / 2);
+            Color = new Color[Texture.Width * Texture.Height];
+            Texture.GetData(Color);
         }
-        public void spawn()
+        public void Spawn()
         {
-            active = true;
-            inbounds = true;
-            position = intPos;
+            Active = true;
+            Inbounds = true;
+            Position = _intPos;
         }
 
         public void update(GameTime gameTime)
         {
-            Vector2 scales = new Vector2(5f, 5f);
-            Vector2 speed  = new Vector2(gameTime.ElapsedGameTime.Milliseconds / 5.0f, gameTime.ElapsedGameTime.Milliseconds / 5.0f);
-            if (active == true)
+            var speed  = new Vector2(gameTime.ElapsedGameTime.Milliseconds / 5.0f, gameTime.ElapsedGameTime.Milliseconds / 5.0f);
+            if (Active)
             {
-                position += (speed * scale * direction);
-                if (inbounds == true)
+                Position += (speed*Scale*Direction);
+                if (Inbounds)
                 {
-                    if (position.Y < -1000 || position.X < -1000 || position.Y > 1600 || position.X > 1600)
+                    if (Position.Y < -1000 || Position.X < -1000 || Position.Y > 1600 || Position.X > 1600)
                     {
-                        position = intPos;
+                        Position = _intPos;
                     }
                 }
-                if (inbounds == false)
+                if (Inbounds == false)
                 {
-                    position = intPos;
-                    active = true;
-                    inbounds = true;
+                    Position = _intPos;
+                    Active = true;
+                    Inbounds = true;
                 }
             }
             
             
         }
-        public void draw(SpriteBatch S)
+        public void draw(SpriteBatch s)
         {
 
             //Adds a sprite to the batch of sprites to be rendered, specifying the texture, screen position, source rectangle, color tint, rotation, origin, scale, effects, and sort depth.  
-            if (active == true)
+            if (Active)
             {
-                S.Begin(SpriteBlendMode.AlphaBlend);  //Start drawing 2D images
-                S.Draw(texture, position, new Rectangle(0, 0, texture.Width, texture.Height), Color.White, 0.0f, Vector2.Zero, scale, SpriteEffects.None, 0);
-                S.End();  //Stop drawing 2D images
+                s.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend); //Start drawing 2D images
+                s.Draw(Texture, Position, new Rectangle(0, 0, Texture.Width, Texture.Height), Microsoft.Xna.Framework.Color.White, 0.0f,
+                       Vector2.Zero, Scale, SpriteEffects.None, 0);
+                s.End(); //Stop drawing 2D images
             }
         }
-
-
     }
 }

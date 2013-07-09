@@ -1,40 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
-using Microsoft.Xna.Framework.Net;
-using Microsoft.Xna.Framework.Storage;
+
+
 namespace WindowsGame1
 {
-    class collisionChecker : Microsoft.Xna.Framework.Game
+    class CollisionChecker : Game
     {
 
 
         //Main method to check for a collision between two graphics objects
-        public bool CheckCollisions(graphicsObject A, graphicsObject B)
+        public bool CheckCollisions(GraphicsObject a, GraphicsObject b)
         {
-            Matrix ATransform, BTransform;
-            Rectangle ARectangle, BRectangle;
-
             //transforms the rectangles which surrounds each sprite
-            ATransform = Transform(A.center, 0.0f, A.position);
-            ARectangle = TransformRectangle(ATransform, A.width, A.height);
+            Matrix aTransform = Transform(a.Center, 0.0f, a.Position);
+            Rectangle aRectangle = TransformRectangle(aTransform, a.Width, a.Height);
 
-            BTransform = Transform(B.center, 0.0f, B.position);
-            BRectangle = TransformRectangle(BTransform, B.width, B.height);
+            Matrix bTransform = Transform(b.Center, 0.0f, b.Position);
+            Rectangle bRectangle = TransformRectangle(bTransform, b.Width, b.Height);
 
             // collision checking
-            if (ARectangle.Intersects(BRectangle))
+            if (aRectangle.Intersects(bRectangle))
             {// rough collision
-                if (PixelCollision(A, B, ATransform, A.width, A.height,
-                                   BTransform, B.width, B.height))
+                if (PixelCollision(a, b, aTransform, a.Width, a.Height,
+                                   bTransform, b.Width, b.Height))
                     return true;  //What to do if there is a collision - in this case, stop the movement
             }
             return false;
@@ -43,22 +31,21 @@ namespace WindowsGame1
 
 
         //Checks to see if the pixels overlap in two graphicsObjects
-        private bool PixelCollision(
-          graphicsObject A, graphicsObject B,
+        private static bool PixelCollision(
+          GraphicsObject a, GraphicsObject b,
           Matrix transformA, int pixelWidthA, int pixelHeightA,
           Matrix transformB, int pixelWidthB, int pixelHeightB)
         {
 
             //set A transformation relative to B.  B remains at (0,0)
-            Matrix AtoB = transformA * Matrix.Invert(transformB);
+            Matrix atoB = transformA * Matrix.Invert(transformB);
 
             //Generate normal vectors to each rectangle's side
-            Vector2 columnStep, rowStep, rowStartPosition;
-            columnStep = Vector2.TransformNormal(Vector2.UnitX, AtoB);
-            rowStep = Vector2.TransformNormal(Vector2.UnitY, AtoB);
+            Vector2 columnStep = Vector2.TransformNormal(Vector2.UnitX, atoB);
+            Vector2 rowStep = Vector2.TransformNormal(Vector2.UnitY, atoB);
 
             //Calculate the top left corner of A
-            rowStartPosition = Vector2.Transform(Vector2.Zero, AtoB);
+            Vector2 rowStartPosition = Vector2.Transform(Vector2.Zero, atoB);
 
             // Search each row of pixels in A.  Start at the top and move down
             for (int rowA = 0; rowA < pixelHeightA; rowA++)
@@ -69,15 +56,15 @@ namespace WindowsGame1
                 for (int colA = 0; colA < pixelWidthA; colA++)
                 {
                     // get the pixel position
-                    int X = (int)Math.Round(pixelPositionA.X);
-                    int Y = (int)Math.Round(pixelPositionA.Y);
+                    var x = (int)Math.Round(pixelPositionA.X);
+                    var y = (int)Math.Round(pixelPositionA.Y);
 
                     //if the pixel is within the bounds of B
-                    if (X >= 0 && X < pixelWidthB && Y >= 0 && Y < pixelHeightB)
+                    if (x >= 0 && x < pixelWidthB && y >= 0 && y < pixelHeightB)
                     {
                         //Get colors of overlapping pixels
-                        Color colorA = A.getPixelColor(colA + rowA * pixelWidthA);
-                        Color colorB = B.getPixelColor(X + Y * pixelWidthB);
+                        Color colorA = a.GetPixelColor(colA + rowA * pixelWidthA);
+                        Color colorB = b.GetPixelColor(x + y * pixelWidthB);
 
                         //If both pixels are not completely transparent
                         if (colorA.A != 0 && colorB.A != 0)
@@ -98,10 +85,10 @@ namespace WindowsGame1
         {
 
             //Get each corner of texture
-            Vector2 leftTop = new Vector2(0.0f, 0.0f);
-            Vector2 rightTop = new Vector2(width, 0.0f);
-            Vector2 leftBottom = new Vector2(0.0f, height);
-            Vector2 rightBottom = new Vector2(width, height);
+            var leftTop = new Vector2(0.0f, 0.0f);
+            var rightTop = new Vector2(width, 0.0f);
+            var leftBottom = new Vector2(0.0f, height);
+            var rightBottom = new Vector2(width, height);
 
             //Transform each corner
             Vector2.Transform(ref leftTop, ref transform, out leftTop);

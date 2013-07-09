@@ -1,42 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
-using Microsoft.Xna.Framework.Net;
-using Microsoft.Xna.Framework.Storage;
+
 
 namespace WindowsGame1
 {
-    class explosionObject : Microsoft.Xna.Framework.Game
+    class ExplosionObject : Game
     {
-        public Vector2 position;
-        public int width, height; 
-        Texture2D texture;
-        public bool active;
+        public Vector2 Position;
+        public int Width, Height;
+        readonly Texture2D _texture;
+        public bool Active;
 
-        public explosionObject(Vector2 intPos, string tex)
+        public ExplosionObject(Vector2 intPos, string tex)
         {
             Content.RootDirectory = "Content";
-            active = false;
-            position = new Vector2(intPos.X, intPos.Y);
-            texture = Texture2D.FromFile(Game1.graphics.GraphicsDevice, tex);
-            width = texture.Width; height = texture.Height;
+            Active = false;
+            Position = new Vector2(intPos.X, intPos.Y);
+            using (var fileStream = new FileStream(tex, FileMode.Open))
+            {
+                _texture = Texture2D.FromStream(Game1.Graphics.GraphicsDevice, fileStream);
+            }
+            Width = _texture.Width; Height = _texture.Height;
         
         }
         public void draw(SpriteBatch S)
         {
             //Adds a sprite to the batch of sprites to be rendered, specifying the texture, screen position, source rectangle, color tint, rotation, origin, scale, effects, and sort depth.  
-            if (active)
+            if (Active)
             {
-                S.Begin(SpriteBlendMode.AlphaBlend);  //Start drawing 2D images
-                S.Draw(texture, position, new Rectangle(0, 0, texture.Width, texture.Height), Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                S.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);  //Start drawing 2D images
+                S.Draw(_texture, Position, new Rectangle(0, 0, _texture.Width, _texture.Height), Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, -1);
                 S.End();  //Stop drawing 2D images
             }
 
